@@ -1,0 +1,5 @@
+HISTORYlistener.log
+datasets/GTSRB/*.p
+models/checkpoints/*
+results/*
+models/checkpoints/Densenet-GTSRB-No-Watermark-ep-20/ckpt.epoch19-loss0.16.h5
