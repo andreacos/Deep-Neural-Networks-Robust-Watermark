@@ -1,31 +1,14 @@
-![Image](Resources/vippdiism.png)
 
-# Robust DNN Watermarking via Fixed Embedding Weights with Optimized Distribution
-A new white-box, multi-bit watermarking algorithm with strong robustness properties, including retraining for transfer learning. 
-Robustness is achieved thanks to a new information coding strategy according to which the watermark message is spread across a 
-number of fixed weights, whose position depends on a secret key. The weights hosting the watermark are set prior to training, 
-and are left unchanged throughout the entire training procedure. The distribution of the weights carrying out the message is 
-theoretically optimised to make sure that the watermarked weights are indistinguishable from the other weights, while at 
-the same time keeping their amplitude as large as possible to improve robustness against retraining.
+# Note
 
-This is the implementation of the paper:
-~~~
-@misc{https://doi.org/10.48550/arxiv.2208.10973,
-  doi = {10.48550/ARXIV.2208.10973},
-  url = {https://arxiv.org/abs/2208.10973},
-  author = {Tondi, Benedetta and Costanzo, Andrea and Barni, Mauro},
-  keywords = {Computer Vision and Pattern Recognition (cs.CV), Cryptography and Security (cs.CR), FOS: Computer and information sciences, FOS: Computer and information sciences},
-  title = {Robust DNN Watermarking via Fixed Embedding Weights with Optimized Distribution},
-  publisher = {arXiv},
-  year = {2022},
-}
-~~~
-Download PDF from [ArXiv](https://arxiv.org/abs/2208.10973).
+Even though XCeption net is fully supported by the new PyTorch version of our code, the results regarding XCeption net in the paper refer to the TensorFlow version of the package.
+To reproduce the results, work in the Tensorflow directory and follow the instructions below. Otherwise, if you want to use the PyTorch implementation with XCeption, check the updated README.
 
 ## Installation
 
-Use the provided *environment.yml* to build the conda environment, then activate it:
+Use the provided *Tensorflow/environment.yml* to build the conda environment, then activate it:
 ~~~
+cd Tensorflow
 conda env create -f environment.yml
 conda activate DnnWatermarking
 ~~~
