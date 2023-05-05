@@ -1,6 +1,6 @@
 ![Image](Resources/vippdiism.png)
 
-#  Robust DNN Watermarking via Fixed Embedding Weights with Optimized Distribution
+#  Chameleon Watermark: A Robust DNN Watermarking Algorithm with Invisible Watermark
 A new white-box, multi-bit watermarking algorithm with strong robustness properties, including retraining for transfer learning. 
 Robustness is achieved thanks to a new information coding strategy according to which the watermark message is spread across a 
 number of fixed weights, whose position depends on a secret key. The weights hosting the watermark are set prior to training, 
