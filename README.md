@@ -1,6 +1,6 @@
 ![Image](Resources/vippdiism.png)
 
-# Robust DNN Watermarking via Fixed Embedding Weights with Optimized Distribution
+#  Robust DNN Watermarking via Fixed Embedding Weights with Optimized Distribution
 A new white-box, multi-bit watermarking algorithm with strong robustness properties, including retraining for transfer learning. 
 Robustness is achieved thanks to a new information coding strategy according to which the watermark message is spread across a 
 number of fixed weights, whose position depends on a secret key. The weights hosting the watermark are set prior to training, 
@@ -32,226 +32,125 @@ conda activate DnnWatermarking
 
 ## Datasets
 
-### CIFAR10
+### CIFAR-10, CIFAR-100 and GTSRB
 
-CIFAR10 is downloaded by TensorFlow the first time it is used.
+The code uses the datasets that are shipped with the torchvision package. The datasets are automatically downloaded only once (the first time that the code runs) and stored in the *data* folder.
 
-### GTSRB
+### LSUN Horses and Cats, GAN vs real faces
 
-The German Traffic Sign Recognition Benchmark (GTSRB) can be downloaded from [its official website](https://benchmark.ini.rub.de/gtsrb_dataset.html) 
-or from [Kaggle](https://www.kaggle.com/datasets/meowmeowmeowmeowmeow/gtsrb-german-traffic-sign).
-We used the Kaggle version (642MB), which contains two CSV files *Train.csv* and *Test.csv* with class labels and path to the corresponding images.
-For convenience, we store training and test data in binary files, *Train.p* (120MB) and *Test.p* (40MB) that are used by the code. To generate these files:
-- [Download the dataset](https://www.kaggle.com/datasets/meowmeowmeowmeowmeow/gtsrb-german-traffic-sign?resource=download) and unzip it
-- Run the following script:
-~~~ 
-python create_gtsrb_dataset.py /path/to/unzipped/archive
+For these datasets, refer to the README for the TensorFlow version of the code.
+.
 ~~~
-this will create the dataset files in the directory datasets/GTSRB. 
-
-### LSUN Horses and Cats
-
-This dataset is a subset of the [LSUN](https://www.yf.io/p/lsun) dataset, from which we chose two of the several available categories. 
-We downloaded the dataset from the official repository with the [download utility](s instructed by the authors) provided by the authors. 
-Recently, LSUN has been added to Tensorflow (read more [here](https://www.tensorflow.org/datasets/catalog/lsun)), which 
-should make this dataset easier to download and use, however we did not use it in our experiments.
-
-The code expects the following structure:
+usage: main.py [-h] [--network {resnet18,densenet121,densenet169,xception}] [--dataset {cifar10,cifar100,gtsrb}] [--task {plan,train,embed,finetune}] [--bits BITS] [--spread SPREAD] [--c C] [--layers LAYERS] [--shares SHARES]
+               [--epochs EPOCHS] [--batch-size BATCH_SIZE] --lr LR [--pretrained PRETRAINED] [--gpu GPU]
+main.py: error: the following arguments are required: --lr
 ~~~
-dataset_dir
-|____ Cat
-    |____ Train         
-    |____ Test
-|____ Horse
-    |____ Train
-    |____ Test
-~~~
-
-Edit the ```class0_dir``` and ```class0_dir``` variables in the training scripts to point to the dataset directory.
-
-### GAN vs real faces
-
-We built the GAN FACES dataset as follows:
-- 30.000 real faces from the [CelebAHQ](https://github.com/tkarras/progressive_growing_of_gans) dataset and 70.000 real 
-faces rom the [FlickrFHQ](https://github.com/NVlabs/ffhq-dataset) dataset 
-- 100.000 Gan faces created with the official release of [StyleGan2](https://github.com/NVlabs/stylegan2). 
-More specifically, we used the official Docker image with model *stylegan2-ffhq-config-f.pkl* 
- (trained with FFHQ) with increasing truncation_psi parameter (10 values, 10000 images for each value). 
-Use the script in create_stylegan2_images.py to reproduce these images.
-- We split the two classes: 90% training and 10% test.
-
-To train the networks for this task, we used image size 299x299x3. You can either resize all the above images 
-(their default size is 1024x1024x3) or let the code resize while training/testing (slower).
-
-~~~
-dataset_dir
-|____ Train
-    |____ GAN         
-    |____ Pristine
-|____ Horse
-    |____ GAN
-    |____ Pristine
-~~~
-
-Edit the ```class0_dir``` and ```class0_dir``` variables in the training scripts to point to the dataset directory.
 
 ## Training baseline models
 
-Baseline, not-watermarked models for a given task are required by the watermarking algorithm to set the standard deviation 
-of the Laplacian watermark strength (that is equal to the standard deviation of the target layer weights). Baseline models 
-can be trained by using the same scripts used to train watermarked models, by setting the following parameter:
+Baseline, non-watermarked models for a given task are required by the watermarking algorithm to set the standard deviation of the Laplacian watermark strength (that is equal to the standard deviation of the target layer weights). 
+Baseline models can be trained with the following command:
 
 ~~~
-disable_watermark = True
+python3 chameleondnn.py --network resnet18 --dataset cifar10 --task train --epochs 200 --lr 0.01
 ~~~
 
-This will make the code skip the watermarking while training. 
+where:
+-  ```network``` can be one value in ```(resnet18,  densenet169,  xception,  densenet121)```
+-  ```dataset``` can be one value in ```(cifar10,  cifar100,  gtsrb)```
+
+At the end of the training, a json file for the selected network and dataset is created in the *config* folder (e.g., *config/config-resnet18-cifar10.json*). The values in the file are used by the embedding procedure, which
+automatically loads the correct file. In this repository, we already provide the configuration files for the setups of the paper.
+
+
+## Embedding the watermark 
+
+
+### Planning
+
+The code allows to plan the embedding by choosing the target layer(s) and verifying the watermark occupancy of the selected layer(s). To choose the host layer(s) run the following command:
 
 ~~~
-python Embed_Watermark_GTSRB.py
-python Embed_Watermark_CIFAR.py
-python XNET_Embed_Watermark_GANFACES.py
+python3 chameleondnn.py --network resnet18 --dataset cifar10 --task plan --bits 256 --spread 50 --c 1
 ~~~
 
-Once the baseline models are trained, set the ```not_wm_model = '''``` variable in each of the three scripts so that it points to
-the right model path and revert to ```disable_watermark = False```.
+This will print a detailed list of all the network layers, together with the shape and the total count of the weights. Here, you can pick up the host layer(s) by name from the L_Name column.
+For example: 
 
-Alternatively, [download the baseline models here](https://drive.google.com/file/d/1Ph1HQ06MGpTzO3nlamBNq2zcdyoryQ2t/view?usp=sharing) 
-(450MB) and unzip them into the ```models/checkpoints``` directory.
-
-
-
-# GTSRB
-
-## Training a DenseNet GTSRB model with watermark
-
-To train a DenseNet GTSRB model with embedded watermark, run the script:
 ~~~
-python Embed_Watermark_GTSRB.py
+L_index  L_Name                             L_shape                         L_count    L_variance    L_std_dev  W_spread    W_mgs    W_wat    W_host    W_share
+---------  ---------------------------------  ----------------------------  ---------  ------------  -----------  ----------  -------  -------  --------  ---------
+...
+       39  layer3.1.convbnrelu_1.conv.weight  torch.Size([256, 256, 3, 3])     589824   0.000866249    0.0294321  nd          nd       nd
+       40  layer3.1.convbnrelu_1.bn.weight    torch.Size([256])                   256   0              0          nd          nd       nd
+       42  layer3.1.convbn_2.conv.weight      torch.Size([256, 256, 3, 3])     589824   0.000868995    0.0294787  nd          nd       nd
+       43  layer3.1.convbn_2.bn.weight        torch.Size([256])                   256   0              0          nd          nd       nd
+       45  layer4.0.convbnrelu_1.conv.weight  torch.Size([512, 256, 3, 3])    1179648   0.000433913    0.0208306  nd          nd       nd
+...
 ~~~
 
-To configure the watermark parameters, modify the following values in the script:
+Then, to verify the watermark occupancy, run the following command:
+
 ~~~
-disable_watermark = False
-layer_setup = '2'   # '1' or '2' or '4'
-spread = 3
-payload = 256
-C = 1
+python3 chameleondnn.py --network resnet18 --dataset cifar10 --task plan --bits 256 --spread 50 --c 1 --layers "layer3.1.convbnrelu_1.conv.weight,layer4.0.convbnrelu_1.conv.weight"
 ~~~
-Set ```disable_watermark = True``` only if you want to train a (baseline) model **without watermark**.
 
-Models for each training epoch will be saved in the following directory:
+note that layers must be provided as a comma-separated string with their exact names. This will produce the following output, with the % occupancy in the last column W_share:
 
-```models/checkpoints/Densenet-GTSRB-Watermarked-B-{payload}-C-{C}-S-{spread}-L-{layers}-ep-{epochs}```
+~~~
+L_index  L_Name                             L_shape                         L_count    L_variance    L_std_dev  W_spread    W_mgs    W_wat    W_host    W_share
+---------  ---------------------------------  ----------------------------  ---------  ------------  -----------  ----------  -------  -------  --------  ---------
+...
+       39  layer3.1.convbnrelu_1.conv.weight  torch.Size([256, 256, 3, 3])     589824   0.000868523    0.0294707          50      256    12800  *         1.09% (6400)
+       45  layer4.0.convbnrelu_1.conv.weight  torch.Size([512, 256, 3, 3])    1179648   0.000434388    0.020842           50      256    12800  *         0.54% (6400)
+...
+~~~
 
-Logs and results will be printed to screen and saved into a text file in the following directory:
-
-```results/Densenet-GTSRB-Watermarked-B-{payload}-C-{C}-S-{spread}-L-{layers}-ep-{epochs}```
+If you are satisfied with the setup, you can proceed to watermark embedding.
 
 
-## Finetuning of a watermarked DenseNet GTSRB model on GTSRB
+### Embedding
 
-To finetune a previously trained and watermarked model on GTSRB, run the following command, whose input argument is the
-to-be-finetuned path to the model, e.g.:
+To train a model with watermark embedding, use the following command:
 
-```
-python Finetune_or_TransferLearning_GTSRB.py models/checkpoints/Densenet-GTSRB-Watermarked-B-256-C-1-S-12-L-2-ep-10/ckpt.epoch10-loss0.30.h5
-```
+~~~
+python3 chameleondnn.py --network resnet18 --dataset cifar10 --task embed --bits 256 --spread 50 --c 1 -epochs 200 --lr 0.01 -layers "layer3.1.convbnrelu_1.conv.weight,layer4.0.convbnrelu_1.conv.weight"
+~~~
 
-The model will be fine-tuned on a random subset of the GTSRB (70% of the complete dataset).  Models for each training 
-epoch will be saved in the following directory:
+The trained model, training history, metrics, input arguments summary and optional output data will be stored in the folder *models/cifar10_resnet18_B256_S50_C1.0/1*. If more than one experiment is carried out with the same setup (e.g., by changing learning rate, epochs or host layers), the code will create new folders incrementally: *models/cifar10_resnet18_B256_S50_C1.0/2*, *models/cifar10_resnet18_B256_S50_C1.0/3* and so on.
+The output directory contains the following data:
+- *best_model.pt*: the trained model weights (save best only)
+- *args.txt*: the list of input arguments
+- *log.csv*: the training history
+- *plan.csv*: the output of the planning procedure with % of watermark occupancy (if planning was actually carried out)
+- *results.txt*: a file containing accuracy, TER and BER.
+- PNG plots of the distribution of watermarked/non-watermarked weights for each host layer
 
-```models/checkpoints/Densenet-GTSRB-from-watermarked-GTSRB-B-{payload}-C-{C}-S-{spread}-L-{layers}-ep-{epochs}```
+## Finetuning / Transfer learning
 
-Logs and results will be printed to screen and saved into a text file in the following directory:
+To finetune a pretrained model, use the following command:
 
-```results/Densenet-GTSRB-from-watermarked-GTSRB-B-{payload}-C-{C}-S-{spread}-L-{layers}-ep-{epochs}```
+~~~
+python3 chameleondnn.py --network resnet18 --dataset cifar10 --task finetune --bits 256 --spread 50 --c 1 -epochs 10 --lr 0.001 -layers "layer3.1.convbnrelu_1.conv.weight,layer4.0.convbnrelu_1.conv.weight" --pretrained models/cifar10_resnet18_B256_S50_C1.0/1/best_model.pt
+~~~
 
-Note that the code will derive the watermarking setup from the directory where the model has been created (e.g.
-payload=256, C-1, spread=12, layers=2). Do not move models or rename their directory at the end of the training 
-(or edit the scripts to point to the correct watermarking settings).
+This command, for example, will finetune the model trained on CIFAR-10 for 10 extra epochs on 70% of the CIFAR-10 dataset.
 
-Verify the BER of the finetuned model with the following command, whose input argument is the path to the finetuned model, e.g.:
+To perform transfer learning to a new dataset from a pretrained model, use the following command:
 
-```
-python Check_Watermark.py models/checkpoints/Densenet-GTSRB-from-watermarked-GTSRB-B-256-C-1-S-12-L-2-ep-10/ckpt.epoch10-loss0.27.h5
-```
+~~~
+python3 chameleondnn.py --network resnet18 --dataset gtsrb --task finetune --bits 256 --spread 50 --c 1 -epochs 20 --lr 0.01 -layers "layer3.1.convbnrelu_1.conv.weight,layer4.0.convbnrelu_1.conv.weight" --pretrained models/cifar10_resnet18_B256_S50_C1.0/1/best_model.pt
+~~~
 
-## Transfer learning from a watermarked DenseNet GTSRB model to CIFAR10
+This command, for example, will train the input pretrained model on the GTSRB dataset for 20 epochs.
 
-To train a DenseNet model on CIFAR10 by starting from the weights of a previously trained and watermarked model on GTSRB, 
-run the following command, whose input argument is the path to the model, e.g.:
 
-```
-python Finetune_or_TransferLearning_CIFAR10.py models/checkpoints/Densenet-GTSRB-Watermarked-B-256-C-1-S-12-L-2-ep-10/ckpt.epoch10-loss0.30.h5
-```
 
-The model will be trained on the CIFAR10 dataset.  Models for each training epoch will be saved in the following directory:
 
-```models/checkpoints/Densenet-```CIFAR10```-from-watermarked-GTSRB-B-{payload}-C-{C}-S-{spread}-L-{layers}-ep-{epochs}```
 
-Logs and results will be printed to screen and saved into a text file in the following directory:
 
-```results/Densenet-CIFAR10-from-watermarked-GTSRB-B-{payload}-C-{C}-S-{spread}-L-{layers}-ep-{epochs}```
 
-Note that the code will derive the watermarking setup from the directory where the model has been created (e.g.
-payload=256, C-1, spread=12, layers=2). Do not move models or rename their directory at the end of the training 
-(or edit the scripts to point to the correct watermarking settings).
 
-Verify the BER of the new model with the following command, whose input argument is the path to the model file, e.g.:
-
-```
-python Check_Watermark.py models/checkpoints/Densenet-CIFAR10-from-watermarked-GTSRB-B-256-C-1-S-12-L-2-ep-10/ckpt.epoch10-loss0.27.h5
-```
-
-# CIFAR10
-
-In principle, this is the same procedure as the one for GTSRB. Refer to that for more details.
-
-## Training 
-
-To train a DenseNet model on the CIFAR10 dataset, edit the watermark settings and then run the command:
-```
-python Embed_Watermark_CIFAR10.py
-```
-Set ```disable_watermark = True``` only if you want to train a (baseline) model **without watermark**.
-
-## Finetuning
-
-To finetune a DenseNet model previously trained with watermark on the CIFAR10 dataset, run the command:
-```
-python Finetune_or_TransferLearning_CIFAR10.py /path/to/model.h5
-```
-
-where the input argument is the path to the trained/watermarked model.
-
-## Transfer learning to GTSRB
-
-To transfer learning from a DenseNet model previously trained with watermark on the CIFAR10 dataset to GTSRB, run the command:
-```````
-python Finetune_or_TransferLearning_GTSRB.py /path/to/model.h5
-```````
-
-where the input argument is the path to the trained/watermarked model.
-
-## Recovering watermark and computing BER
-
-Run the following command on any model (watermarked, finetuned or transfer-learning) to retrieve the watermark and
-compute the BER:
-```
-python Check_Watermark.py /path/to/model.h5
-```
-
-# GAN FACES
-
-Use the following scripts, they work exactly as the ones described above, just for XCeptionNet:
-
-```
-python XNET_Embed_Watermark_GANFACES.py 
-python XNET_Finetune_or_TransferLearning_GANFACES.py /path/to/model.h5
-python XNET_Finetune_or_TransferLearning_HORSECAT.py /path/to/model.h5
-python XNET_Check_Watermark.py /path/to/model.h5
-```
 
 
 
