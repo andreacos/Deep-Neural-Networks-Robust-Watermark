@@ -67,7 +67,7 @@ DenseNet169:
 Use the provided *environment.yml* to build the conda environment, then activate it:
 ~~~
 conda env create -f environment.yml
-conda activate DnnWatermarking
+conda activate cuml-torch
 ~~~
 
 ## Datasets
