@@ -78,7 +78,7 @@ The code uses the datasets that are shipped with the torchvision package. The da
 
 ### LSUN Horses and Cats, GAN vs real faces
 
-For these datasets, refer to the README of TensorFlow version.
+For these datasets, refer to the [README of TensorFlow version](https://github.com/andreacos/Deep-Neural-Networks-Robust-Watermark/blob/main/README_xception.md).
 
 ## Command line arguments
 
