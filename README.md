@@ -1,6 +1,9 @@
 ![Image](Resources/vippdiism.png)
 
 #  Chameleon Watermark: A Robust DNN Watermarking Algorithm with Invisible Watermark
+
+![Image](Resources/chameleon.png)
+
 A new white-box, multi-bit watermarking algorithm with strong robustness properties, including retraining for transfer learning. 
 Robustness is achieved thanks to a new information coding strategy according to which the watermark message is spread across a 
 number of fixed weights, whose position depends on a secret key. The weights hosting the watermark are set prior to training, 
@@ -26,7 +29,7 @@ Download PDF from [ArXiv](https://arxiv.org/abs/2208.10973).
 ## Additional material
 
 In the tables below, we report all the information on the host layers ```k```, the total number of weights in the layer (```Nk```), and the variance of the distribution of the non-watermarked weights for each layer (```σk2```), 
-that for the sake of brevity were not reported in the paper. Note that *Layer depth* refers to the index of the host layer according to PyTorch.
+that for the sake of brevity were not reported in the paper. The "x" in the columns *Layers = N* indicates that the corresponding layer is used in that setup. Note that *Layer depth* refers to the index of the host layer according to PyTorch.
 
 ResNet18:
 
