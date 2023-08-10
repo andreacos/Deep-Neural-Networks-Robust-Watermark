@@ -22,7 +22,7 @@ This is the implementation of the paper:
       primaryClass={cs.CV}
 }
 ~~~
-Download PDF from [ArXiv](https://arxiv.org/abs/2208.10973).
+[Download PDF from ArXiv](https://arxiv.org/abs/2208.10973).
 
 
 ## Additional material
