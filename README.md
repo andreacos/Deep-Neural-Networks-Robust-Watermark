@@ -20,7 +20,6 @@ This is the implementation of the paper:
       eprint={2208.10973},
       archivePrefix={arXiv},
       primaryClass={cs.CV}
-},
 }
 ~~~
 Download PDF from [ArXiv](https://arxiv.org/abs/2208.10973).
