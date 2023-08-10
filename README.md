@@ -1,6 +1,6 @@
 ![Image](Resources/vippdiism.png)
 
-#  Chameleon Watermark: A Robust DNN Watermarking Algorithm with Invisible Watermark
+#  Robust DNN Watermarking via Fixed Embedding Weights with Optimized Distribution
 
 ![Image](Resources/chameleon.png)
 
@@ -13,14 +13,14 @@ the same time keeping their amplitude as large as possible to improve robustness
 
 This is the implementation of the paper:
 ~~~
-@misc{https://doi.org/10.48550/arxiv.2208.10973,
-  doi = {10.48550/ARXIV.2208.10973},
-  url = {https://arxiv.org/abs/2208.10973},
-  author = {Tondi, Benedetta and Costanzo, Andrea and Barni, Mauro},
-  keywords = {Computer Vision and Pattern Recognition (cs.CV), Cryptography and Security (cs.CR), FOS: Computer and information sciences, FOS: Computer and information sciences},
-  title = {Robust DNN Watermarking via Fixed Embedding Weights with Optimized Distribution},
-  publisher = {arXiv},
-  year = {2022},
+@misc{tondi2022robust,
+      title={Robust DNN Watermarking via Fixed Embedding Weights with Optimized Distribution}, 
+      author={Benedetta Tondi and Andrea Costanzo and Mauro Barni},
+      year={2022},
+      eprint={2208.10973},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV}
+},
 }
 ~~~
 Download PDF from [ArXiv](https://arxiv.org/abs/2208.10973).
