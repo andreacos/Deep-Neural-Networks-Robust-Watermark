@@ -1,6 +1,6 @@
 ![Image](Resources/vippdiism.png)
 
-#  Robust DNN Watermarking via Fixed Embedding Weights with Optimized Distribution
+#  Robust and Large-Payload DNN Watermarking via Fixed, Distribution-Optimized, Weights
 
 ![Image](Resources/chameleon.png)
 
