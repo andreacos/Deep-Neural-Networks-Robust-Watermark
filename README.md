@@ -14,7 +14,7 @@ the same time keeping their amplitude as large as possible to improve robustness
 This is the implementation of the paper:
 ~~~
 @misc{tondi2022robust,
-      title={Robust DNN Watermarking via Fixed Embedding Weights with Optimized Distribution}, 
+      title={Robust and Large-Payload DNN Watermarking via Fixed, Distribution-Optimized, Weights}, 
       author={Benedetta Tondi and Andrea Costanzo and Mauro Barni},
       year={2022},
       eprint={2208.10973},
